@@ -1,0 +1,96 @@
+# Build the manager binary
+ARG DIST_IMG=ubuntu:22.04
+
+ARG GO_VERSION=1.20
+
+FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
+
+## docker buildx build injected build-args:
+#BUILDPLATFORM — matches the current machine. (e.g. linux/amd64)
+#BUILDOS — os component of BUILDPLATFORM, e.g. linux
+#BUILDARCH — e.g. amd64, arm64, riscv64
+#BUILDVARIANT — used to set ARM variant, e.g. v7
+#TARGETPLATFORM — The value set with --platform flag on build
+#TARGETOS - OS component from --platform, e.g. linux
+#TARGETARCH - Architecture from --platform, e.g. arm64
+#TARGETVARIANT
+
+ARG TARGETOS
+ARG TARGETARCH
+
+ARG GIT_COMMIT_ID
+ARG GIT_TAG_VERSION
+
+ARG GOPROXY=https://goproxy.cn
+ARG BUILD_DATE
+ARG BUILD_TAGS
+
+ARG LD_FLAGS="-s -w \
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.buildDate=${BUILD_DATE} \
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.gitRevision=${GIT_COMMIT_ID} \
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.walgVersion=${GIT_TAG_VERSION}"
+
+ENV GONOPROXY=github.com/apecloud
+ENV GONOSUMDB=github.com/apecloud
+ENV GOPRIVATE=github.com/apecloud
+ENV GOPROXY=${GOPROXY}
+
+WORKDIR /src
+
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends --no-install-suggests \
+    liblzo2-dev \
+    libsodium-dev \
+    libbrotli-dev \
+    zstd
+
+# Copy the Go Modules manifests
+COPY go.mod go.mod
+COPY go.sum go.sum
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
+
+# Copy the go source
+COPY cmd/ cmd/
+COPY main/ main/
+COPY pkg/ pkg/
+COPY submodules/ submodules/
+COPY internal/ internal/
+COPY utility/ utility/
+COPY test/ test/
+COPY tests_func/ tests_func/
+COPY testtools/ testtools/
+COPY link_brotli.sh link_brotli.sh
+COPY link_libsodium.sh link_libsodium.sh
+
+RUN go mod tidy -compat=1.20 && go mod verify &&  go mod vendor
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" \
+    go build -mod vendor -tags "${BUILD_TAGS}"  -ldflags="${LD_FLAGS}" -o /wal-g ./main/mysql/main.go
+
+# download mysql binary tools
+FROM ${DIST_IMG} as bin-downloader
+WORKDIR /
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends --no-install-suggests \
+    mysql-server mysql-client
+
+
+FROM ${DIST_IMG} as dist
+
+ENV MYSQLDATA /var/lib/mysql
+
+WORKDIR /
+RUN apt-get update && \
+    apt-get -qq install --yes --no-install-recommends --no-install-suggests \
+    libsodium23 liblzo2-2 libbrotli1 libedit2 libssl3 lzop brotli zstd && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /wal-g /usr/bin/wal-g
+COPY --from=bin-downloader /usr/bin/mysqlbinlog /usr/bin/mysqlbinlog
+COPY --from=bin-downloader /usr/bin/mysql /usr/bin/mysql
+
+USER 1000:1000
+
+ENTRYPOINT ["/user/bin/wal-g"]
