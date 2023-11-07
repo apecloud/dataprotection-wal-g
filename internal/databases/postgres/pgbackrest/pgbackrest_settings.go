@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"gopkg.in/ini.v1"
+
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 )
 

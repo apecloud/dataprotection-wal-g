@@ -59,6 +59,7 @@ func runOplogPush(ctx context.Context, pushArgs oplogPushRunArgs, statsArgs oplo
 	if err != nil {
 		return err
 	}
+	// change folder's subPath to models.OplogArchBasePath
 	uplProvider.ChangeDirectory(models.OplogArchBasePath)
 	uploader := archive.NewStorageUploader(uplProvider)
 

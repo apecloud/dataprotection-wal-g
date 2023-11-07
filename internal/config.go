@@ -11,13 +11,14 @@ import (
 
 	"github.com/apecloud/dataprotection-wal-g/internal/limiters"
 
-	"github.com/apecloud/dataprotection-wal-g/internal/webserver"
-	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"github.com/wal-g/tracelog"
+
+	"github.com/apecloud/dataprotection-wal-g/internal/webserver"
+	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 )
 
 const (
@@ -185,6 +186,8 @@ const (
 	SSHPrivateKeyPath = "SSH_PRIVATE_KEY_PATH"
 
 	SystemdNotifySocket = "NOTIFY_SOCKET"
+
+	DatasafedConfigFile = "WALG_DATASAFED_CONFIG"
 )
 
 var (
@@ -215,6 +218,7 @@ var (
 		MaxDelayedSegmentsCount:      "0",
 		SerializerTypeSetting:        "json_default",
 		LibsodiumKeyTransform:        "none",
+		DatasafedConfigFile:          "/etc/datasafed/datasafed.conf",
 	}
 
 	MongoDefaultSettings = map[string]string{
