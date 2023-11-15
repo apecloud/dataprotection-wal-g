@@ -6,11 +6,11 @@ import (
 	"io"
 	"os"
 
-	"github.com/apecloud/dataprotection-wal-g/internal/databases/mongo/stages/mocks"
+	mongomocks "github.com/apecloud/dataprotection-wal-g/internal/databases/mongo/stages/mocks"
 )
 
 var (
-	_ = []Buffer{&FileBuffer{}, &MemoryBuffer{}, &mocks.Buffer{}}
+	_ = []Buffer{&FileBuffer{}, &MemoryBuffer{}, &mongomocks.Buffer{}}
 )
 
 // Buffer defines interface to accumulate bytes.

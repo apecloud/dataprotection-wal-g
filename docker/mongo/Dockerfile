@@ -1,7 +1,7 @@
 # Build the manager binary
 ARG DIST_IMG=mongo:5.0.14
 
-ARG GO_VERSION=1.20
+ARG GO_VERSION=1.21
 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
 
@@ -26,9 +26,9 @@ ARG BUILD_DATE
 ARG BUILD_TAGS
 
 ARG LD_FLAGS="-s -w \
-  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.buildDate=${BUILD_DATE} \
-  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.gitRevision=${GIT_COMMIT_ID} \
-  -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.walgVersion=${GIT_TAG_VERSION}"
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mongo.buildDate=${BUILD_DATE} \
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mongo.gitRevision=${GIT_COMMIT_ID} \
+  -X github.com/apecloud/dataprotection-wal-g/cmd/mongo.walgVersion=${GIT_TAG_VERSION}"
 
 ENV GONOPROXY=github.com/apecloud
 ENV GONOSUMDB=github.com/apecloud
@@ -37,7 +37,7 @@ ENV GOPROXY=${GOPROXY}
 
 WORKDIR /src
 
-# RUN go mod tidy -compat=1.20 && go mod verify &&  go mod vendor
+# RUN go mod tidy -compat=1.21 && go mod verify &&  go mod vendor
 RUN --mount=type=bind,target=. \
     --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg \

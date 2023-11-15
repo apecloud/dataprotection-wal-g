@@ -3,14 +3,16 @@ package internal
 import (
 	"strings"
 
+	"github.com/spf13/viper"
+
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/azure"
+	"github.com/apecloud/dataprotection-wal-g/pkg/storages/datasafed"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/fs"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/gcs"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/s3"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/sh"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/swift"
-	"github.com/spf13/viper"
 )
 
 type StorageAdapter struct {
@@ -53,4 +55,5 @@ var StorageAdapters = []StorageAdapter{
 	{"AZ_PREFIX", azure.SettingList, azure.ConfigureFolder, nil},
 	{"SWIFT_PREFIX", swift.SettingList, swift.ConfigureFolder, nil},
 	{"SSH_PREFIX", sh.SettingsList, sh.ConfigureFolder, nil},
+	{"DATASAFED_CONFIG", sh.SettingsList, datasafed.ConfigureFolder, nil},
 }

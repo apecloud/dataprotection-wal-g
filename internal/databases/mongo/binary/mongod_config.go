@@ -5,8 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/apecloud/dataprotection-wal-g/utility"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v3"
+
+	"github.com/apecloud/dataprotection-wal-g/utility"
 )
 
 type MongodFileConfig struct {

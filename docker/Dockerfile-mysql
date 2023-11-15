@@ -1,7 +1,7 @@
 # Build the manager binary
 ARG DIST_IMG=ubuntu:22.04
 
-ARG GO_VERSION=1.20
+ARG GO_VERSION=1.21
 
 FROM --platform=${BUILDPLATFORM} golang:${GO_VERSION} as builder
 
@@ -45,27 +45,30 @@ RUN apt-get update && \
     zstd
 
 # Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
+#COPY go.mod go.mod
+#COPY go.sum go.sum
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
-RUN go mod download
+#RUN go mod download
 
 # Copy the go source
-COPY cmd/ cmd/
-COPY main/ main/
-COPY pkg/ pkg/
-COPY submodules/ submodules/
-COPY internal/ internal/
-COPY utility/ utility/
-COPY test/ test/
-COPY tests_func/ tests_func/
-COPY testtools/ testtools/
-COPY link_brotli.sh link_brotli.sh
-COPY link_libsodium.sh link_libsodium.sh
+#COPY cmd/ cmd/
+#COPY main/ main/
+#COPY pkg/ pkg/
+#COPY submodules/ submodules/
+#COPY internal/ internal/
+#COPY utility/ utility/
+#COPY test/ test/
+#COPY tests_func/ tests_func/
+#COPY testtools/ testtools/
+#COPY link_brotli.sh link_brotli.sh
+#COPY link_libsodium.sh link_libsodium.sh
 
-RUN go mod tidy -compat=1.20 && go mod verify &&  go mod vendor
-RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" \
+# RUN go mod tidy -compat=1.21 && go mod verify &&  go mod vendor
+RUN --mount=type=bind,target=. \
+    --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" \
     go build -mod vendor -tags "${BUILD_TAGS}"  -ldflags="${LD_FLAGS}" -o /wal-g ./main/mysql/main.go
 
 # download mysql binary tools
