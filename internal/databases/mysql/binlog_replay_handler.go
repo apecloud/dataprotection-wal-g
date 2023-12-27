@@ -98,6 +98,7 @@ func getTimestamps(folder storage.Folder, backupName, untilTS, untilBinlogLastMo
 			return time.Time{}, time.Time{}, time.Time{}, err
 		}
 	} else {
+		// get the latest base backup
 		backup, err := internal.GetBackupByName(backupName, utility.BaseBackupPath, folder)
 		if err != nil {
 			return time.Time{}, time.Time{}, time.Time{}, errors.Wrap(err, "Unable to get backup")
