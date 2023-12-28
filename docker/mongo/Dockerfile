@@ -48,6 +48,6 @@ FROM ${DIST_IMG} as dist
 
 COPY --from=builder /wal-g /bin
 
-USER root:root
+USER 1000:1000
 
 ENTRYPOINT ["wal-g"]
