@@ -1,5 +1,5 @@
 # Build the manager binary
-ARG DIST_IMG=mongo:5.0.14
+ARG DIST_IMG=debian:stable-slim
 
 ARG GO_VERSION=1.21
 
@@ -45,6 +45,12 @@ RUN --mount=type=bind,target=. \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" go build -mod vendor -tags "${BUILD_TAGS}"  -ldflags="${LD_FLAGS}" -o /wal-g ./main/mongo/main.go
 
 FROM ${DIST_IMG} as dist
+
+RUN apt-get update && apt-get install -y wget gnupg procps
+RUN wget -qO- https://www.mongodb.org/static/pgp/server-7.0.asc | tee /etc/apt/trusted.gpg.d/server-7.0.asc
+RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+RUN apt-get update && apt-get install -y \
+    mongodb-mongosh
 
 COPY --from=builder /wal-g /bin
 
