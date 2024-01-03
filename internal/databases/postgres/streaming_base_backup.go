@@ -11,14 +11,15 @@ import (
 	"io"
 	"time"
 
-	"github.com/apecloud/dataprotection-wal-g/internal"
-
-	"github.com/apecloud/dataprotection-wal-g/internal/ioextensions"
-	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pglogrepl"
+	"github.com/jackc/pgproto3/v2"
 	"github.com/pkg/errors"
 	"github.com/wal-g/tracelog"
+
+	"github.com/apecloud/dataprotection-wal-g/internal"
+	"github.com/apecloud/dataprotection-wal-g/internal/ioextensions"
+	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 )
 
 var (
