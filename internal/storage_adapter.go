@@ -55,5 +55,5 @@ var StorageAdapters = []StorageAdapter{
 	{"AZ_PREFIX", azure.SettingList, azure.ConfigureFolder, nil},
 	{"SWIFT_PREFIX", swift.SettingList, swift.ConfigureFolder, nil},
 	{"SSH_PREFIX", sh.SettingsList, sh.ConfigureFolder, nil},
-	{"DATASAFED_CONFIG", sh.SettingsList, datasafed.ConfigureFolder, nil},
+	{"DATASAFED_CONFIG", nil, datasafed.ConfigureFolder, nil},
 }
