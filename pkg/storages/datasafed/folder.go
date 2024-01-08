@@ -2,16 +2,14 @@ package datasafed
 
 import (
 	"context"
-	"fmt"
 	"io"
-	"os"
 	"path"
-	"path/filepath"
 	"strings"
+	"sync"
 
-	dfconfig "github.com/apecloud/datasafed/pkg/config"
-	dfstorage "github.com/apecloud/datasafed/pkg/storage"
-	"github.com/apecloud/datasafed/pkg/storage/rclone"
+	"github.com/apecloud/datasafed/pkg/app"
+	ds "github.com/apecloud/datasafed/pkg/storage"
+	"github.com/spf13/cobra"
 	"github.com/wal-g/tracelog"
 
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
@@ -19,9 +17,9 @@ import (
 
 const (
 	defaultConfigFilePath = "/etc/datasafed/datasafed.conf"
-	backendBasePathEnv    = "DATASAFED_BACKEND_BASE_PATH"
-	rootKey               = "root"
 )
+
+var initOnce sync.Once
 
 func NewError(err error, format string, args ...interface{}) storage.Error {
 	return storage.NewError(err, "datasafed", format, args...)
@@ -30,7 +28,7 @@ func NewError(err error, format string, args ...interface{}) storage.Error {
 // Folder represents folder of file system
 type Folder struct {
 	subPath string
-	storage dfstorage.Storage
+	storage ds.Storage
 	ctx     context.Context
 }
 
@@ -42,44 +40,24 @@ func NewFolder(configFilePath string, subPath string) (*Folder, error) {
 	if configFilePath == "" {
 		configFilePath = defaultConfigFilePath
 	}
-	if err := dfconfig.InitGlobal(configFilePath); err != nil {
-		return nil, NewError(err, "init datasafed config failed, config file: %s", configFilePath)
-	}
-	storageConf := dfconfig.GetGlobal().GetAll(dfconfig.StorageSection)
-	adjustRoot(storageConf)
-	globalStorage, err := rclone.New(storageConf)
+	ctx := context.Background()
+	var err error
+	initOnce.Do(func() {
+		err = app.InitGlobalStorage(ctx, configFilePath)
+		if err == nil {
+			cobra.OnFinalize(func() {
+				app.InvokeFinalizers()
+			})
+		}
+	})
 	if err != nil {
-		return nil, err
+		return nil, NewError(err, "init datasafed storage failed, config file: %s", configFilePath)
 	}
-	return &Folder{storage: globalStorage, subPath: subPath, ctx: context.Background()}, nil
-}
-
-func adjustRoot(storageConf map[string]string) error {
-	basePath := os.Getenv(backendBasePathEnv)
-	if basePath == "" {
-		return nil
+	globalStorage, err := app.GetGlobalStorage()
+	if err != nil {
+		return nil, NewError(err, "failed to get global storage")
 	}
-
-	basePath = filepath.Clean(basePath)
-	if strings.HasPrefix(basePath, "..") {
-		return fmt.Errorf("invalid base path %q from env %s",
-			os.Getenv(backendBasePathEnv), backendBasePathEnv)
-	}
-	if basePath == "." {
-		basePath = ""
-	} else {
-		basePath = strings.TrimPrefix(basePath, "/")
-		basePath = strings.TrimPrefix(basePath, "./")
-	}
-	root := storageConf[rootKey]
-	if strings.HasSuffix(root, "/") {
-		root = root + basePath
-	} else {
-		root = root + "/" + basePath
-	}
-	path.Join()
-	storageConf[rootKey] = root
-	return nil
+	return &Folder{storage: globalStorage, subPath: subPath, ctx: ctx}, nil
 }
 
 // GetPath gets the root path.
@@ -88,23 +66,20 @@ func (folder *Folder) GetPath() string {
 }
 
 func (folder *Folder) ListFolder() (objects []storage.Object, subFolders []storage.Folder, err error) {
-	entries, err := folder.storage.List(folder.ctx, folder.subPath, &dfstorage.ListOptions{})
-	if err != nil {
-		return nil, nil, NewError(err, "Unable to list folder")
-	}
-	for _, fileInfo := range entries {
-		if fileInfo.IsDir() {
-			// I do not use GetSubfolder() intentially
-			subPath := path.Join(folder.subPath, fileInfo.Name()) + "/"
+	err = folder.storage.List(folder.ctx, folder.subPath, &ds.ListOptions{}, func(entry ds.DirEntry) error {
+		if entry.IsDir() {
+			// not using GetSubFolder() by intention
+			subPath := path.Join(folder.subPath, entry.Name()) + "/"
 			subFolders = append(subFolders, &Folder{
 				ctx:     folder.ctx,
 				storage: folder.storage,
 				subPath: subPath,
 			})
 		} else {
-			objects = append(objects, storage.NewLocalObject(fileInfo.Name(), fileInfo.MTime(), fileInfo.Size()))
+			objects = append(objects, storage.NewLocalObject(entry.Name(), entry.MTime(), entry.Size()))
 		}
-	}
+		return nil
+	})
 	return
 }
 
@@ -157,7 +132,7 @@ func (folder *Folder) GetSubFolder(subFolderRelativePath string) storage.Folder 
 
 func (folder *Folder) ReadObject(objectRelativePath string) (io.ReadCloser, error) {
 	filePath := folder.GetFilePath(objectRelativePath)
-	return folder.storage.ReadObject(folder.ctx, filePath)
+	return folder.storage.OpenFile(folder.ctx, filePath, 0, -1)
 }
 
 func (folder *Folder) PutObject(name string, content io.Reader) error {
@@ -171,7 +146,7 @@ func (folder *Folder) PutObject(name string, content io.Reader) error {
 }
 
 func (folder *Folder) CopyObject(srcPath string, dstPath string) error {
-	readerCloser, err := folder.storage.ReadObject(folder.ctx, srcPath)
+	readerCloser, err := folder.storage.OpenFile(folder.ctx, srcPath, 0, -1)
 	if err != nil {
 		return err
 	}
