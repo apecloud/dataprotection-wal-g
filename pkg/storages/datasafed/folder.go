@@ -2,6 +2,7 @@ package datasafed
 
 import (
 	"context"
+	"errors"
 	"io"
 	"path"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/apecloud/datasafed/pkg/app"
 	ds "github.com/apecloud/datasafed/pkg/storage"
+	"github.com/rclone/rclone/fs"
 	"github.com/spf13/cobra"
 	"github.com/wal-g/tracelog"
 
@@ -132,7 +134,14 @@ func (folder *Folder) GetSubFolder(subFolderRelativePath string) storage.Folder 
 
 func (folder *Folder) ReadObject(objectRelativePath string) (io.ReadCloser, error) {
 	filePath := folder.GetFilePath(objectRelativePath)
-	return folder.storage.OpenFile(folder.ctx, filePath, 0, -1)
+	reader, err := folder.storage.OpenFile(folder.ctx, filePath, 0, -1)
+	if err != nil {
+		if errors.As(err, &fs.ErrorObjectNotFound) {
+			return reader, storage.NewObjectNotFoundError(objectRelativePath)
+		}
+		return reader, err
+	}
+	return reader, nil
 }
 
 func (folder *Folder) PutObject(name string, content io.Reader) error {
