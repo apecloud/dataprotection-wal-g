@@ -8,12 +8,13 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/pkg/errors"
+	"github.com/wal-g/tracelog"
+
 	"github.com/apecloud/dataprotection-wal-g/internal/compression"
 	"github.com/apecloud/dataprotection-wal-g/internal/ioextensions"
 	"github.com/apecloud/dataprotection-wal-g/pkg/storages/storage"
 	"github.com/apecloud/dataprotection-wal-g/utility"
-	"github.com/pkg/errors"
-	"github.com/wal-g/tracelog"
 )
 
 type ArchiveNonExistenceError struct {
@@ -187,6 +188,7 @@ func DownloadAndDecompressStorageFile(reader StorageFolderReader, fileName strin
 
 func findDecompressorAndDownload(reader StorageFolderReader, fileName string) (io.ReadCloser, compression.Decompressor, error) {
 	for _, decompressor := range putCachedDecompressorInFirstPlace(compression.Decompressors) {
+		tracelog.DebugLogger.Printf("try download file with decompressor %s", decompressor.FileExtension())
 		archiveReader, exists, err := TryDownloadFile(reader, fileName+"."+decompressor.FileExtension())
 		if err != nil {
 			return nil, nil, err
