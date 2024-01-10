@@ -67,7 +67,7 @@ ENV MYSQLDATA /var/lib/mysql
 WORKDIR /
 RUN apk update && \
     apk add --update --no-cache \
-    mysql-client=10.11.5-r3 zstd bash coreutils
+    mysql-client=10.11.5-r3 zstd bash coreutils jq
 
 COPY --from=builder /wal-g /usr/bin/wal-g
 COPY --from=bin-downloader /usr/bin/mysqlbinlog /usr/bin/mysqlbinlog
