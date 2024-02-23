@@ -212,8 +212,8 @@ If `FIND_FULL` is specified, WAL-G will calculate minimum backup needed to keep 
 `wal-g st` command series allows the direct interaction with the configured storage.
 [Storage tools documentation](StorageTools.md)
 
-## Support apecloud datasafed(https://github.com/apecloud/datasafed)
-To enable the datasafed backend, you can utilize the WALG-DATASAFED-CONFIG environment variable. This variable allows you to specify the configuration path for datasafed.
+## Support apecloud datasafed
+To enable the [datasafed](https://github.com/apecloud/datasafed) backend, you can utilize the WALG-DATASAFED-CONFIG environment variable. This variable allows you to specify the configuration path for datasafed.
 
 Databases
 -----------
