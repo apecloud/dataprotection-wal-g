@@ -1,10 +1,13 @@
 # WAL-G
+
 ![Docker-tests-status](https://github.com/apecloud/dataprotection-wal-g/workflows/Docker%20tests/badge.svg)
 ![Unit-tests-status](https://github.com/apecloud/dataprotection-wal-g/workflows/Unit%20tests/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/apecloud/dataprotection-wal-g)](https://goreportcard.com/report/github.com/apecloud/dataprotection-wal-g)
 [![Documentation Status](https://readthedocs.org/projects/wal-g/badge/?version=latest)](https://wal-g.readthedocs.io/?badge=latest)
 
 [This documentation is also available at wal-g.readthedocs.io](https://wal-g.readthedocs.io)
+
+This project forks from [wal-g/wal-g](https://github.com/wal-g/wal-g).
 
 WAL-G is an archival restoration tool for PostgreSQL, MySQL/MariaDB, and MS SQL Server (beta for MongoDB and Redis).
 
@@ -212,8 +215,8 @@ If `FIND_FULL` is specified, WAL-G will calculate minimum backup needed to keep 
 `wal-g st` command series allows the direct interaction with the configured storage.
 [Storage tools documentation](StorageTools.md)
 
-## Support apecloud datasafed(https://github.com/apecloud/datasafed)
-To enable the datasafed backend, you can utilize the WALG-DATASAFED-CONFIG environment variable. This variable allows you to specify the configuration path for datasafed.
+## Support apecloud datasafed
+To enable the [datasafed](https://github.com/apecloud/datasafed) backend, you can utilize the WALG-DATASAFED-CONFIG environment variable. This variable allows you to specify the configuration path for datasafed.
 
 Databases
 -----------
