@@ -135,7 +135,7 @@ func (folder *Folder) ReadObject(objectRelativePath string) (io.ReadCloser, erro
 	filePath := folder.GetFilePath(objectRelativePath)
 	reader, err := folder.storage.OpenFile(folder.ctx, filePath, 0, -1)
 	if err != nil {
-		if errors.As(err, &ds.ErrObjectNotFound) {
+		if errors.Is(err, ds.ErrObjectNotFound) {
 			return reader, storage.NewObjectNotFoundError(objectRelativePath)
 		}
 		return reader, err

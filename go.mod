@@ -9,7 +9,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.1.0
 	github.com/Azure/go-autorest/autorest v0.11.21
 	github.com/RoaringBitmap/roaring v0.4.21
-	github.com/apecloud/datasafed v0.1.0
+	github.com/apecloud/datasafed v0.2.0
 	github.com/aws/aws-sdk-go v1.44.246
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/cenkalti/backoff v2.2.1+incompatible
