@@ -45,7 +45,7 @@ var (
 func init() {
 	binlogServerCmd.Flags().StringVar(&sinceTS,
 		"since-ts",
-		utility.TimeNowCrossPlatformLocal().Format(time.RFC3339),
+		"",
 		sinceTSFlagShortDescr)
 	binlogServerCmd.Flags().StringVar(&BinlogBackupName, "since", "LATEST", binlogSinceFlagShortDescr)
 	binlogServerCmd.Flags().StringVar(&untilTS,
