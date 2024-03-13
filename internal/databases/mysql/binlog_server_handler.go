@@ -258,10 +258,10 @@ func (h Handler) HandleQuery(query string) (*mysql.Result, error) {
 	}
 }
 
-func HandleBinlogServer(since string, until string) {
+func HandleBinlogServer(since string, until, sinceTS string) {
 	folder, err := internal.ConfigureFolder()
 	tracelog.ErrorLogger.FatalOnError(err)
-	startTS, untilTS, _, err = getTimestamps(folder, since, until, "", "")
+	startTS, untilTS, _, err = getTimestamps(folder, since, until, "", sinceTS)
 	tracelog.ErrorLogger.FatalOnError(err)
 
 	tracelog.InfoLogger.Printf("Starting binlog server")
