@@ -79,7 +79,7 @@ jobs:
       matrix: ${{ fromJSON(needs.get-images-info.outputs.matrix) }}
     uses: apecloud/apecloud-cd/.github/workflows/release-image-cache.yml@v0.1.58
     with:
-      IMG: "apecloud/${{ matrix.image-name }}}"
+      IMG: "apecloud/${{ matrix.image-name }}"
       VERSION: "${{ matrix.image-tag }}"
       DOCKERFILE_PATH: "./docker/wal-g/${{ matrix.docker-file }}"
       REMOVE_PREFIX: false
