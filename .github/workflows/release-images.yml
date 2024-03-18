@@ -9,11 +9,11 @@ on:
         default: ''
       image_name:
         description: 'Release select image or release all'
-        required: false
+        required: true
         default: ''
         type: choice
         options:
-          - 'all'
+          - all
           - mongo
           - mysql
           - mysql-ubuntu
@@ -33,7 +33,7 @@ jobs:
           IMAGES_INFO=""
           image_name="wal-g-${{ inputs.image_name }}"
           image_tag="${{ inputs.image_tag }}"
-          case "${{ inputs.image_name }}" in
+          case ${{ inputs.image_name }} in
               *-ubuntu)
                   if [[ "${image_tag}" != *"ubuntu"* ]]; then
                       image_tag=${image_tag}-ubuntu
@@ -44,22 +44,22 @@ jobs:
               ;;
               all)
                   for docker_file in $( ls docker/wal-g | (grep "Dockerfile" || true )); do
-                      image_name="wal-g-${docker_file/Dockerfile-/}"
-                      image_tag="${{ inputs.image_tag }}"
+                      image_name_tmp="wal-g-${docker_file/Dockerfile-/}"
+                      image_tag_tmp="test"
                       case ${docker_file} in
                           Dockerfile-*-ubuntu)
-                              if [[ "${image_tag}" != *"ubuntu"* ]]; then
-                                  image_tag=${image_tag}-ubuntu
+                              if [[ "${image_tag_tmp}" != *"ubuntu"* ]]; then
+                                  image_tag_tmp=${image_tag_tmp}-ubuntu
                               fi
                           ;;
                           Dockerfile-postgres)
-                              image_name="wal-g-pg"
+                              image_name_tmp="wal-g-pg"
                           ;;
                       esac
                       if [[ -z "$IMAGES_INFO" ]]; then
-                          IMAGES_INFO="{\"image-name\":\"$image_name\",\"image-tag\":\"$image_tag\",\"docker-file\":\"$docker_file\"}"
+                          IMAGES_INFO="{\"image-name\":\"$image_name_tmp\",\"image-tag\":\"$image_tag_tmp\",\"docker-file\":\"$docker_file\"}"
                       else
-                          IMAGES_INFO="$IMAGES_INFO,{\"image-name\":\"$image_name\",\"image-tag\":\"$image_tag\",\"docker-file\":\"$docker_file\"}"
+                          IMAGES_INFO="$IMAGES_INFO,{\"image-name\":\"$image_name_tmp\",\"image-tag\":\"$image_tag_tmp\",\"docker-file\":\"$docker_file\"}"
                       fi
                   done
               ;;
@@ -76,7 +76,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.get-images-info.outputs.matrix) }}
-    uses: apecloud/apecloud-cd/.github/workflows/release-image-cache-amd-sync.yml@v0.1.58
+    uses: apecloud/apecloud-cd/.github/workflows/release-image-cache.yml@v0.1.58
     with:
       IMG: "apecloud/${{ matrix.image-name }}}"
       VERSION: "${{ matrix.image-tag }}"
