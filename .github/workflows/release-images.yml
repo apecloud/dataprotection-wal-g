@@ -27,6 +27,7 @@ jobs:
     outputs:
       matrix: ${{ steps.get_images_info.outputs.matrix }}
     steps:
+      - uses: actions/checkout@v4
       - name: get images info
         id: get_images_info
         run: |
