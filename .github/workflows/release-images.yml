@@ -72,7 +72,7 @@ jobs:
 
   release-images:
     name: release image ${{ matrix.image-name }}
-    needs: [ get-addons-chart-dir ]
+    needs: [ get-images-info ]
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.get-images-info.outputs.matrix) }}
