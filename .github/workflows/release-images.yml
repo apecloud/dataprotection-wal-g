@@ -40,6 +40,9 @@ jobs:
                   if [[ "${image_tag}" != *"ubuntu"* ]]; then
                       image_tag=${image_tag}-ubuntu
                   fi
+                  if [[ "{{ inputs.image_name }}" == "mysql-ubuntu" ]]; then 
+                      image_name="wal-g-mysql"
+                  fi
               ;;
               all)
                   for docker_file in $( ls docker/wal-g | (grep "Dockerfile" || true )); do
@@ -49,6 +52,9 @@ jobs:
                           Dockerfile-*-ubuntu)
                               if [[ "${image_tag_tmp}" != *"ubuntu"* ]]; then
                                   image_tag_tmp=${image_tag_tmp}-ubuntu
+                              fi
+                              if [[ "${image_name_tmp}" == "wal-g-mysql-ubuntu" ]]; then 
+                                  image_name_tmp="wal-g-mysql"
                               fi
                           ;;
                       esac
