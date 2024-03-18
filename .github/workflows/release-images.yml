@@ -19,7 +19,7 @@ on:
           - mysql-ubuntu
           - postgres
 
-run-name: Release Image:${{ inputs.image_name }}:${{ inputs.image_tag }} ${{ github.ref_name }}
+run-name: release image:${{ inputs.image_name }}:${{ inputs.image_tag }} ${{ github.ref_name }}
 
 jobs:
   get-images-info:
