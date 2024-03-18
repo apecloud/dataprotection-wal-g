@@ -40,7 +40,7 @@ jobs:
                   if [[ "${image_tag}" != *"ubuntu"* ]]; then
                       image_tag=${image_tag}-ubuntu
                   fi
-                  if [[ "{{ inputs.image_name }}" == "mysql-ubuntu" ]]; then 
+                  if [[ "${{ inputs.image_name }}" == "mysql-ubuntu" ]]; then
                       image_name="wal-g-mysql"
                   fi
               ;;
