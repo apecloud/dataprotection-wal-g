@@ -1,4 +1,3 @@
-# Build the manager binary
 ARG DIST_IMG=debian:stable-slim
 
 ARG GO_VERSION=1.21

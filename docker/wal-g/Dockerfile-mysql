@@ -1,4 +1,3 @@
-# Build the manager binary
 ARG DIST_IMG=alpine:3.19
 
 ARG GO_VERSION=1.21-alpine
