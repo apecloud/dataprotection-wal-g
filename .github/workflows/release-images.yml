@@ -8,12 +8,12 @@ on:
         required: true
         default: ''
       image_name:
-        description: 'Release select image or empty release all'
+        description: 'Release select image or release all'
         required: false
         default: ''
         type: choice
         options:
-          - ''
+          - 'all'
           - mongo
           - mysql
           - mysql-ubuntu
@@ -42,7 +42,7 @@ jobs:
               postgres)
                   image_name="wal-g-pg"
               ;;
-              *)
+              all)
                   for docker_file in $( ls docker/wal-g | (grep "Dockerfile" || true )); do
                       image_name="wal-g-${docker_file/Dockerfile-/}"
                       image_tag="${{ inputs.image_tag }}"
