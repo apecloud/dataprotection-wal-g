@@ -37,18 +37,20 @@ ENV GOPROXY=${GOPROXY}
 WORKDIR /src
 
 # Copy the Go Modules manifests
-#COPY go.mod go.mod
-#COPY go.sum go.sum
+COPY go.mod go.mod
+COPY go.sum go.sum
 # cache deps before building and copying source so that we don't need to re-download as much
 # and so that source changes don't invalidate our downloaded layer
-#RUN go mod download
+RUN apk update && apk add --no-cache git
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
 
 # RUN go mod tidy -compat=1.21 && go mod verify &&  go mod vendor
 RUN --mount=type=bind,target=. \
     --mount=type=cache,target=/root/.cache/go-build \
-    --mount=type=cache,target=/go/pkg \
-    GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" \
-    go build -mod vendor -tags "${BUILD_TAGS}"  -ldflags="${LD_FLAGS}" -o /wal-g ./main/mysql/main.go
+    --mount=type=cache,target=/go/pkg/mod \
+    go env && \
+    GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -tags "${BUILD_TAGS}" -ldflags="${LD_FLAGS}" -o /wal-g ./main/mysql/main.go
 
 FROM ${DIST_IMG} as dist
 

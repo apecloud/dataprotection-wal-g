@@ -17,7 +17,7 @@ on:
           - mongo
           - mysql
           - mysql-ubuntu
-          - postgres
+          - pg
 
 run-name: release image:${{ inputs.image_name }}:${{ inputs.image_tag }} ${{ github.ref_name }}
 
@@ -41,9 +41,6 @@ jobs:
                       image_tag=${image_tag}-ubuntu
                   fi
               ;;
-              postgres)
-                  image_name="wal-g-pg"
-              ;;
               all)
                   for docker_file in $( ls docker/wal-g | (grep "Dockerfile" || true )); do
                       image_name_tmp="wal-g-${docker_file/Dockerfile-/}"
@@ -53,9 +50,6 @@ jobs:
                               if [[ "${image_tag_tmp}" != *"ubuntu"* ]]; then
                                   image_tag_tmp=${image_tag_tmp}-ubuntu
                               fi
-                          ;;
-                          Dockerfile-postgres)
-                              image_name_tmp="wal-g-pg"
                           ;;
                       esac
                       if [[ -z "$IMAGES_INFO" ]]; then
