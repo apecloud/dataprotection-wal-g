@@ -1,0 +1,87 @@
+name: Release Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'The tag of image'
+        required: true
+        default: ''
+      image_name:
+        description: 'Release select image or release all'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - 'all'
+          - mongo
+          - mysql
+          - mysql-ubuntu
+          - postgres
+
+run-name: Release Image:${{ inputs.image_name }}:${{ inputs.image_tag }} ${{ github.ref_name }}
+
+jobs:
+  get-images-info:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.get_images_info.outputs.matrix }}
+    steps:
+      - name: get images info
+        id: get_images_info
+        run: |
+          IMAGES_INFO=""
+          image_name="wal-g-${{ inputs.image_name }}"
+          image_tag="${{ inputs.image_tag }}"
+          case "${{ inputs.image_name }}" in
+              *-ubuntu)
+                  if [[ "${image_tag}" != *"ubuntu"* ]]; then
+                      image_tag=${image_tag}-ubuntu
+                  fi
+              ;;
+              postgres)
+                  image_name="wal-g-pg"
+              ;;
+              all)
+                  for docker_file in $( ls docker/wal-g | (grep "Dockerfile" || true )); do
+                      image_name="wal-g-${docker_file/Dockerfile-/}"
+                      image_tag="${{ inputs.image_tag }}"
+                      case ${docker_file} in
+                          Dockerfile-*-ubuntu)
+                              if [[ "${image_tag}" != *"ubuntu"* ]]; then
+                                  image_tag=${image_tag}-ubuntu
+                              fi
+                          ;;
+                          Dockerfile-postgres)
+                              image_name="wal-g-pg"
+                          ;;
+                      esac
+                      if [[ -z "$IMAGES_INFO" ]]; then
+                          IMAGES_INFO="{\"image-name\":\"$image_name\",\"image-tag\":\"$image_tag\",\"docker-file\":\"$docker_file\"}"
+                      else
+                          IMAGES_INFO="$IMAGES_INFO,{\"image-name\":\"$image_name\",\"image-tag\":\"$image_tag\",\"docker-file\":\"$docker_file\"}"
+                      fi
+                  done
+              ;;
+          esac
+          if [[ -z "${IMAGES_INFO}" ]]; then
+              IMAGES_INFO="{\"image-name\":\"$image_name\",\"image-tag\":\"$image_tag\",\"docker-file\":\"$docker_file\"}"
+          fi
+          echo "$IMAGES_INFO"
+          echo "matrix={\"include\":[$IMAGES_INFO]}" >> $GITHUB_OUTPUT
+
+  release-images:
+    name: release image ${{ matrix.image-name }}
+    needs: [ get-addons-chart-dir ]
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.get-images-info.outputs.matrix) }}
+    uses: apecloud/apecloud-cd/.github/workflows/release-image-cache-amd-sync.yml@v0.1.58
+    with:
+      IMG: "apecloud/${{ matrix.image-name }}}"
+      VERSION: "${{ matrix.image-tag }}"
+      DOCKERFILE_PATH: "./docker/wal-g/${{ matrix.docker-file }}"
+      REMOVE_PREFIX: false
+      APECD_REF: "v0.1.58"
+    secrets: inherit
+
