@@ -1,5 +1,4 @@
-# Build the manager binary
-ARG DIST_IMG=alpine:3.19
+ARG DIST_IMG=ubuntu:22.04
 
 ARG GO_VERSION=1.21-alpine
 
@@ -51,26 +50,17 @@ RUN --mount=type=bind,target=. \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} GOFLAGS="-mod=mod" \
     go build -mod vendor -tags "${BUILD_TAGS}"  -ldflags="${LD_FLAGS}" -o /wal-g ./main/mysql/main.go
 
-# download mysql binary tools
-FROM ${DIST_IMG} as bin-downloader
-WORKDIR /
-ARG DEBIAN_FRONTEND=noninteractive
-RUN apk update && \
-    apk add --update --no-cache \
-    mysql=10.11.5-r3
-
-
 FROM ${DIST_IMG} as dist
 
 ENV MYSQLDATA /var/lib/mysql
 
 WORKDIR /
-RUN apk update && \
-    apk add --update --no-cache \
-    mysql-client=10.11.5-r3 zstd bash coreutils jq
+RUN apt-get update && \
+    apt-get install --yes --no-install-recommends --no-install-suggests \
+    mysql-server zstd jq ca-certificates && \
+    update-ca-certificates
 
 COPY --from=builder /wal-g /usr/bin/wal-g
-COPY --from=bin-downloader /usr/bin/mysqlbinlog /usr/bin/mysqlbinlog
 
 USER 1000:1000
 

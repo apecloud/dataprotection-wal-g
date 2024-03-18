@@ -96,26 +96,6 @@ mysql_test: deps mysql_build unlink_brotli mysql_integration_test
 mysql_build: $(CMD_FILES) $(PKG_FILES)
 	(cd $(MAIN_MYSQL_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.gitRevision=`git rev-parse --short HEAD` -X github.com/apecloud/dataprotection-wal-g/cmd/mysql.walgVersion=`git tag -l --points-at HEAD`")
 
-build_mysql_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) build . --platform linux/arm64  --tag docker.io/apecloud/wal-g:mysql-8.0 --file docker/Dockerfile-mysql $(DOCKER_BUILD_ARGS)
-
-push_mysql_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) buildx build . --push --sbom=false --provenance=false --platform linux/arm64,linux/amd64  \
-	--tag docker.io/apecloud/wal-g:mysql-8.0 --file docker/Dockerfile-mysql $(DOCKER_BUILD_ARGS)
-
-build_mongo_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) build . --platform linux/arm64  --tag docker.io/apecloud/wal-g:mongo-5.0 --file docker/mongo/Dockerfile $(DOCKER_BUILD_ARGS)
-
-push_mongo_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) buildx build . --push --sbom=false --provenance=false --platform linux/arm64,linux/amd64  --tag docker.io/apecloud/wal-g:mongo-5.0 --file docker/mongo/Dockerfile $(DOCKER_BUILD_ARGS)
-
-build_postgres_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) build . --platform linux/arm64  --tag docker.io/apecloud/wal-g:postgres-1.0 --file docker/Dockerfile-postgres $(DOCKER_BUILD_ARGS)
-
-push_postgres_image: $(CMD_FILES) $(PKG_FILES)
-	$(DOCKER) buildx build . --push --sbom=false --provenance=false --platform linux/arm64,linux/amd64  \
-	--tag docker.io/apecloud/wal-g:postgres-1.0 --file docker/Dockerfile-postgres $(DOCKER_BUILD_ARGS)
-
 sqlserver_build: $(CMD_FILES) $(PKG_FILES)
 	(cd $(MAIN_SQLSERVER_PATH) && go build -mod vendor -tags "$(BUILD_TAGS)" -o wal-g -ldflags "-s -w -X github.com/apecloud/dataprotection-wal-g/cmd/sqlserver.buildDate=`date -u +%Y.%m.%d_%H:%M:%S` -X github.com/apecloud/dataprotection-wal-g/cmd/sqlserver.gitRevision=`git rev-parse --short HEAD` -X github.com/apecloud/dataprotection-wal-g/cmd/sqlserver.walgVersion=`git tag -l --points-at HEAD`")
 
@@ -281,3 +261,6 @@ unlink_brotli:
 
 unlink_libsodium:
 	rm -rf tmp/libsodium
+
+
+include docker/wal-g/docker.mk
