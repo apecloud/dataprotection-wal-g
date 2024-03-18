@@ -35,7 +35,7 @@ jobs:
           image_tag="${{ inputs.image_tag }}"
           case "${{ inputs.image_name }}" in
               *-ubuntu)
-                  if [[ "${{ image_tag }}" != *"ubuntu"* ]]; then
+                  if [[ "${image_tag}" != *"ubuntu"* ]]; then
                       image_tag=${image_tag}-ubuntu
                   fi
               ;;
@@ -48,7 +48,7 @@ jobs:
                       image_tag="${{ inputs.image_tag }}"
                       case ${docker_file} in
                           Dockerfile-*-ubuntu)
-                              if [[ "${{ image_tag }}" != *"ubuntu"* ]]; then
+                              if [[ "${image_tag}" != *"ubuntu"* ]]; then
                                   image_tag=${image_tag}-ubuntu
                               fi
                           ;;
