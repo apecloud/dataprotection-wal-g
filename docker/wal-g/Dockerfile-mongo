@@ -36,11 +36,6 @@ ENV GOPROXY=${GOPROXY}
 
 WORKDIR /src
 
-COPY go.mod go.mod
-COPY go.sum go.sum
-
-RUN --mount=type=cache,target=/go/pkg/mod \
-    go mod download
 # RUN go mod tidy -compat=1.21 && go mod verify &&  go mod vendor
 RUN --mount=type=bind,target=. \
     --mount=type=cache,target=/root/.cache/go-build \
