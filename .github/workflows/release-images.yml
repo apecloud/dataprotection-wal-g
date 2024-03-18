@@ -34,6 +34,7 @@ jobs:
           IMAGES_INFO=""
           image_name="wal-g-${{ inputs.image_name }}"
           image_tag="${{ inputs.image_tag }}"
+          docker_file="Dockerfile-${{ inputs.image_name }}"
           case ${{ inputs.image_name }} in
               *-ubuntu)
                   if [[ "${image_tag}" != *"ubuntu"* ]]; then
