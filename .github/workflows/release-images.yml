@@ -8,7 +8,7 @@ on:
         required: true
         default: ''
       image_name:
-        description: 'Only release select image,empty release all'
+        description: 'Release select image or empty release all'
         required: false
         default: ''
         type: choice
